@@ -10,10 +10,9 @@ const PORT = process.env.PORT || 3001;
 // Multer setup for temporary audio upload storage
 const upload = multer({ dest: 'uploads/' });
 
-app.use(express.static('public'));
 app.use(express.json());
 
-// Enable CORS for frontend testing
+// Enable CORS for frontend/app testing
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
@@ -22,7 +21,7 @@ app.use((req, res, next) => {
 
 // Health check endpoint
 app.get('/', (req, res) => {
-  res.send('Voice Changer Microservice is running successfully!');
+  res.send('Voice Changer Microservice is running successfully with FFmpeg!');
 });
 
 // Voice transformation endpoint using FFmpeg Formant Shifting
@@ -37,10 +36,10 @@ app.post('/convert-voice', upload.single('audio'), (req, res) => {
 
   let ffmpegCommand = '';
   if (targetGender === 'female') {
-    // Pitch shift up + formant preservation approximation
+    // Formant/pitch shift up for female voice
     ffmpegCommand = `ffmpeg -i ${inputPath} -af "asetrate=44100*1.2,atempo=1/1.2" ${outputPath}`;
   } else {
-    // Male: pitch shift down
+    // Pitch shift down for male voice
     ffmpegCommand = `ffmpeg -i ${inputPath} -af "asetrate=44100*0.85,atempo=1/0.85" ${outputPath}`;
   }
 
@@ -62,3 +61,4 @@ app.post('/convert-voice', upload.single('audio'), (req, res) => {
 app.listen(PORT, () => {
   console.log(`Voice changer server listening on port ${PORT}`);
 });
+  
