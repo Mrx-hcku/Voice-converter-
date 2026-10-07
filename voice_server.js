@@ -18,7 +18,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Jab tum browser ya Render URL par jaoge, toh yeh HTML page direct khul jayega (HTTP/HTTPS par)
+// Test/Landing HTML page for smooth browser mic testing
 app.get('/', (req, res) => {
   res.send(`<!DOCTYPE html>
 <html lang="en">
@@ -47,7 +47,7 @@ app.get('/', (req, res) => {
 <body>
     <div class="container">
         <h2>Voice Changer Hub</h2>
-        <p class="subtitle">Live Server Testing Panel</p>
+        <p class="subtitle">Rubberband Natural Formant Filter</p>
         
         <div class="form-group">
             <label for="serverUrl">Backend Server URL:</label>
@@ -80,7 +80,6 @@ app.get('/', (req, res) => {
     </div>
 
     <script>
-        // Automatically set current domain as server URL
         document.getElementById('serverUrl').value = window.location.origin;
 
         let mediaRecorder;
@@ -137,7 +136,7 @@ app.get('/', (req, res) => {
                     statusText.innerText = "Status: Recording...";
                     audioConverted.src = "";
                 } catch (err) {
-                    alert('Mic permission denied or not allowed on this protocol. Use http:// or https://');
+                    alert('Mic permission denied or protocol not supported.');
                 }
             } else {
                 mediaRecorder.stop();
@@ -152,7 +151,7 @@ app.get('/', (req, res) => {
 </html>`);
 });
 
-// Voice transformation endpoint
+// Voice transformation endpoint using Rubberband Formant Shifting
 app.post('/convert-voice', upload.single('audio'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No audio file uploaded' });
@@ -164,9 +163,11 @@ app.post('/convert-voice', upload.single('audio'), (req, res) => {
 
   let ffmpegCommand = '';
   if (targetGender === 'female') {
-    ffmpegCommand = `ffmpeg -i ${inputPath} -af "asetrate=44100*1.2,atempo=1/1.2" ${outputPath}`;
+    // Advanced rubberband filter for natural female conversion
+    ffmpegCommand = `ffmpeg -i ${inputPath} -af "rubberband=pitch=1.35:formant=shift" ${outputPath}`;
   } else {
-    ffmpegCommand = `ffmpeg -i ${inputPath} -af "asetrate=44100*0.85,atempo=1/0.85" ${outputPath}`;
+    // Advanced rubberband filter for natural male conversion
+    ffmpegCommand = `ffmpeg -i ${inputPath} -af "rubberband=pitch=0.75:formant=shift" ${outputPath}`;
   }
 
   exec(ffmpegCommand, (err, stdout, stderr) => {
